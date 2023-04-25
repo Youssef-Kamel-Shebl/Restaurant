@@ -24,10 +24,33 @@ class DatabaseServices {
   }
 
   // Function to get a list of all restaurants in Firestore
-  Future<List<QueryDocumentSnapshot>> getAllRestaurants() async {
+  Future<List<Restaurant>> getAllRestaurants() async {
     final querySnapshot = await restaurantsCollection.get();
-    return querySnapshot.docs;
+    List<Restaurant> restaurants = [];
+
+    for (var doc in querySnapshot.docs) {
+      Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+      if (data != null) {
+        Restaurant restaurant = Restaurant.withId(
+          doc.id ?? '0',
+          data['name'] ?? '',
+          data['description'] ?? '',
+          data['foodCategory']?? '',
+          data['numTables'] ?? 0,
+          data['numSeats'] ?? 0,
+          List<String>.from(data['timeslots'] ?? []),
+          data['location'] ?? '',
+          data['image'] ?? '',
+          data['token'] ?? '',
+        );
+        restaurants.add(restaurant);
+      }
+    }
+
+    return restaurants;
   }
+
+
 
   // Function to get a single restaurant document from Firestore by ID
   Future<DocumentSnapshot> getRestaurantById(String id) async {
