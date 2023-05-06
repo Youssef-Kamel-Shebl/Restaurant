@@ -27,21 +27,24 @@ class DatabaseServices {
   Future<List<Restaurant>> getAllRestaurants() async {
     final querySnapshot = await restaurantsCollection.get();
     List<Restaurant> restaurants = [];
+    print(querySnapshot);
 
     for (var doc in querySnapshot.docs) {
       Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
       if (data != null) {
         Restaurant restaurant = Restaurant.withId(
           doc.id ?? '0',
-          data['name'] ?? '',
-          data['description'] ?? '',
-          data['food_category']?? '',
-          data['num_tables'] ?? 0,
-          data['num_seats'] ?? 0,
-          List<String>.from(data['time_slots'] ?? []),
-          data['location'] ?? '',
-          data['image'] ?? '',
-          data['token'] ?? '',
+            data['name'] as String,
+            data['description'] as String,
+            data['food_category'],
+            data['num_tables'] as int,
+            data['num_seats'] as int,
+            List<String>.from(data['time_slots'] as List) as List<String>,
+            data['latitude'] as String,
+            data['longitude'] as String,
+            data['image'] as String,
+            data['token'],
+            data['location']
         );
         restaurants.add(restaurant);
       }
