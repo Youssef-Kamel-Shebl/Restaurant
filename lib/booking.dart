@@ -14,7 +14,7 @@ class BookingScreen extends StatefulWidget {
 class _BookingScreenState extends State<BookingScreen> {
   var database = DatabaseServices();
   // Define a list of tables with their corresponding number of chairs
-  final List<int> _tables = [];
+  late List<int> _tables = [];
   // Define a variable to store the selected table
   int? _selectedTableId;
 
@@ -38,19 +38,30 @@ class _BookingScreenState extends State<BookingScreen> {
             ),
             SizedBox(height: 16.0),
             Expanded(
-              child: ListView.builder(
-                itemCount: _tables.length,
-                itemBuilder: (context, index) {
-                  final table = _tables[index];
-                  return ListTile(
-                    title: Text('Table 4 chairs'),
-                    trailing: _selectedTableId == table ? Icon(Icons.check_circle) : null,
-                    onTap: () {
-                      setState(() {
-                        _selectedTableId = table;
-                      });
-                    },
-                  );
+              child: FutureBuilder<void>(
+                future: fetchTables(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error fetching tables'));
+                  } else {
+                    return ListView.builder(
+                      itemCount: _tables.length,
+                      itemBuilder: (context, index) {
+                        var table = _tables[index];
+                        return ListTile(
+                          title: Text('Table 4 chairs'),
+                          trailing: _selectedTableId == table ? Icon(Icons.check_circle) : null,
+                          onTap: () {
+                            setState(() {
+                              _selectedTableId = table;
+                            });
+                          },
+                        );
+                      },
+                    );
+                  }
                 },
               ),
             ),
@@ -58,19 +69,19 @@ class _BookingScreenState extends State<BookingScreen> {
             ElevatedButton(
               onPressed: _selectedTableId == null ? null : () {
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => ReservationScreen()));
+                    context, MaterialPageRoute(builder: (context) => ReservationScreen(restaurant_id: widget.restaurant.id, table: _selectedTableId, timeSlots: widget.restaurant.timeslots,)));
               },
-              child: Text('Confirm Booking'),
+              child: Text('Continue Booking'),
             ),
           ],
         ),
       ),
     );
   }
-  Future<void> fetchRestaurants() async {
-    final List<int> bookedTables = await database.getBookedTables(widget.restaurant.id) as List<int>;
+
+  Future<void> fetchTables() async {
+    final List<int> bookedTables = await database.getBookedTables(widget.restaurant.id);
     int tables = widget.restaurant.numTables - bookedTables.length;
-    _tables.fillRange(1, tables,0);
-    print(_tables);
+    _tables = List<int>.generate(tables, (index) => index + 1);
   }
 }

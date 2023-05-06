@@ -35,10 +35,10 @@ class DatabaseServices {
           doc.id ?? '0',
           data['name'] ?? '',
           data['description'] ?? '',
-          data['foodCategory']?? '',
-          data['numTables'] ?? 0,
-          data['numSeats'] ?? 0,
-          List<String>.from(data['timeslots'] ?? []),
+          data['food_category']?? '',
+          data['num_tables'] ?? 0,
+          data['num_seats'] ?? 0,
+          List<String>.from(data['time_slots'] ?? []),
           data['location'] ?? '',
           data['image'] ?? '',
           data['token'] ?? '',
@@ -101,7 +101,7 @@ class DatabaseServices {
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('books')
-        .where('resturant_id', isEqualTo: restaurantId)
+        .where('restaurant_id', isEqualTo: restaurantId)
         .get();
 
     querySnapshot.docs.forEach((doc) {
@@ -113,5 +113,68 @@ class DatabaseServices {
 
     return bookedTables;
   }
+
+  // Future<void> addBooking(String restaurantId, int newBookedTables) async {
+  //   // try {
+  //     // Get a reference to the document with the specified restaurant_id
+  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //         .collection('books')
+  //         .where('restaurant_id', isEqualTo: restaurantId)
+  //         .get();
+  //
+  //     // Get the first document from the query result
+  //     DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+  //
+  //     // Get the current booked_tables array from the document
+  //     List<int> currentBookedTables = List<int>.from(documentSnapshot.get('booked_tables'));
+  //
+  //     // Add the new booked tables to the current booked tables
+  //     currentBookedTables.add(newBookedTables);
+  //
+  //     // Update the document with the new booked tables array
+  //     await documentSnapshot.reference.update({'booked_tables': currentBookedTables});
+  //
+  //     print('Booked tables updated successfully!');
+  //   // } catch (e) {
+  //   //   print('Error updating booked tables: $e');
+  //   // }
+  // }
+
+  Future<void> addBooking(String restaurantId, int newBookedTables) async {
+    try {
+      // Get a reference to the document with the specified restaurant_id
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('books')
+          .where('restaurant_id', isEqualTo: restaurantId)
+          .get();
+
+      // Check if the query result is empty
+      // if (querySnapshot.docs.isEmpty) {
+      //   print('No document found with restaurant_id = $restaurantId');
+      //   return;
+      // } else {
+      //   print('Document found with restaurant_id = $restaurantId');
+      //   return;
+      // }
+
+      // Get the first document from the query result
+      DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+
+      // Get the current booked_tables array from the document
+      List<int> currentBookedTables = List<int>.from(documentSnapshot.get('booked_tables'));
+
+      // Add the new booked tables to the current booked tables
+      currentBookedTables.add(newBookedTables);
+
+      // Update the document with the new booked tables array
+      await documentSnapshot.reference.update({'booked_tables': currentBookedTables});
+
+      print('Booked tables updated successfully!');
+    } catch (e) {
+      print('Error updating booked tables: $e');
+    }
+  }
+
+  
 
 }
