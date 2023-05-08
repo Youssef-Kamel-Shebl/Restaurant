@@ -8,6 +8,9 @@ import './services/database.dart';
 
 class RestaurantScreen extends StatelessWidget {
   var database = DatabaseServices();
+  var categoryId;
+
+  RestaurantScreen({super.key, this.categoryId});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +19,7 @@ class RestaurantScreen extends StatelessWidget {
         title: Text('Restaurants'),
       ),
       body: FutureBuilder<List<Restaurant>>(
-        future: fetchRestaurants(),
+        future: fetchRestaurants(this.categoryId),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final restaurants = snapshot.data!;
@@ -91,8 +94,8 @@ class RestaurantScreen extends StatelessWidget {
     );
   }
 
-  Future<List<Restaurant>> fetchRestaurants() async {
-    final restaurants = await database.getAllRestaurants();
+  Future<List<Restaurant>> fetchRestaurants(categoryId) async {
+    final restaurants = await database.getAllRestaurants(categoryId);
     return restaurants;
   }
 }

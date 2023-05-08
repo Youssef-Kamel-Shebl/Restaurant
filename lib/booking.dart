@@ -80,8 +80,6 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Future<void> fetchTables() async {
-    final List<int> bookedTables = await database.getBookedTables(widget.restaurant.id);
-    int tables = widget.restaurant.numTables - bookedTables.length;
-    _tables = List<int>.generate(tables, (index) => index + 1);
+    _tables = List<int>.generate(widget.restaurant.numTables, (index) => index + 1);
   }
 }

@@ -120,7 +120,7 @@ class _ReservationScreenState extends State<ReservationScreen> {
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
-                database.addBooking(widget.restaurant_id, widget.table);
+                database.addBooking(widget.restaurant_id, widget.table, _selectedTime.format(context), _selectedDate, context);
               },
               child: Text('Confirm Booking'),
             ),

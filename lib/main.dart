@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant/classes/Category.dart';
 import './booking.dart';
+import 'services/database.dart';
 import './restaurant.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'search_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -38,22 +42,20 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
+  var database = DatabaseServices();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Restaurant Booking'),
+        automaticallyImplyLeading: false,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              // Navigate to search page
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.person),
-            onPressed: () {
-              // Navigate to user profile page
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => SearchPage()));
             },
           ),
         ],
@@ -93,15 +95,32 @@ class HomePage extends StatelessWidget {
           ),
           SizedBox(height: 8.0),
           Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              padding: EdgeInsets.all(16.0),
-              children: <Widget>[
-                _buildCategoryItem(context, 'Italian', Icons.local_pizza),
-                _buildCategoryItem(context, 'Mexican', Icons.local_bar),
-                _buildCategoryItem(context, 'Japanese', Icons.restaurant),
-                _buildCategoryItem(context, 'Chinese', Icons.local_dining),
-              ],
+            child: FutureBuilder<List<Category>>(
+              future: fetchCategories(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error loading categories'),
+                  );
+                } else if (!snapshot.hasData) {
+                  return Center(
+                    child: Text('No categories found'),
+                  );
+                } else {
+                  List<Category>? categories = snapshot.data ?? [];
+                  return GridView.count(
+                    crossAxisCount: 2,
+                    padding: EdgeInsets.all(16.0),
+                    children: categories.map((category) {
+                      return _buildCategoryItem(context, category.name, Icons.local_dining, category.id);
+                    }).toList(),
+                  );
+                }
+              },
             ),
           ),
         ],
@@ -109,11 +128,11 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryItem(BuildContext context, String name, IconData icon) {
+  Widget _buildCategoryItem(BuildContext context, String name, IconData icon , categoryId) {
     return InkWell(
       onTap: () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => RestaurantScreen()));
+            context, MaterialPageRoute(builder: (context) => RestaurantScreen(categoryId: categoryId,)));
       },
       child: Card(
         child: Column(
@@ -129,5 +148,11 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<List<Category>> fetchCategories() async {
+    final categories = await database.getAllCategories();
+    print(categories);
+    return categories;
   }
 }
