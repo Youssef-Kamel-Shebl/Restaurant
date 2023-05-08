@@ -69,7 +69,7 @@ class _BookingScreenState extends State<BookingScreen> {
             ElevatedButton(
               onPressed: _selectedTableId == null ? null : () {
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => ReservationScreen(restaurant_id: widget.restaurant.id, table: _selectedTableId, timeSlots: widget.restaurant.timeslots,)));
+                    context, MaterialPageRoute(builder: (context) => ReservationScreen(restaurant_id: widget.restaurant.id, table: _selectedTableId, timeSlots: widget.restaurant.timeslots,token: widget.restaurant.token,)));
               },
               child: Text('Continue Booking'),
             ),
